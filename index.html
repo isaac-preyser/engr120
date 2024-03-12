@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<html>
+    <head>
+        <link rel="stylesheet" href="https://unpkg.com/mvp.css"> 
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Bigweld's big website</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+    </head>
+    
+    <body>
+        <section id="section-1">
+            <header>
+                <h2>Bigweld's BIG website</h2>
+            </header>
+            <aside>
+                <h3>Forecast:</h3>
+                <script type="text/javascript">
+                    var apiUrl = "https://api.pirateweather.net/forecast/8xb4Xw81stuOYY6R9OaUdLcwsbsRQzBa/48.4284%2C-123.3656?units=ca";
+                    fetch(apiUrl).then(response => {
+                      return response.json();
+                    }).then(data => {
+                      
+                      console.log(data);
+                    }).catch(err => {
+                      // Do something for an error here
+                    });
+                </script>
+            </aside>
+            <aside>
+               
+            </aside>
+            <aside>
+                
+            </aside>
+        </section>
+        
+    </body>
+</html>
