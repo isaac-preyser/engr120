@@ -5,41 +5,61 @@
 <!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
 <html>
     <head>
-        <link rel="stylesheet" href="https://unpkg.com/mvp.css"> 
+        <link rel="stylesheet" href="mvp.css"> 
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <title>Bigweld's big website</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="">
+        <script src="scripts.js"></script>
     </head>
     
-    <body>
+    <body onload="init()">
+        <section id="header">
+            <h1>Bigweld's Big Website</h1>
+            
+        </section>
+
+
+
         <section id="section-1">
-            <header>
-                <h2>Bigweld's BIG website</h2>
-            </header>
             <aside>
-                <h3>Forecast:</h3>
-                <script type="text/javascript">
-                    var apiUrl = "https://api.pirateweather.net/forecast/8xb4Xw81stuOYY6R9OaUdLcwsbsRQzBa/48.4284%2C-123.3656?units=ca";
-                    fetch(apiUrl).then(response => {
-                      return response.json();
-                    }).then(data => {
-                      
-                      console.log(data);
-                    }).catch(err => {
-                      // Do something for an error here
-                    });
-                </script>
-            </aside>
-            <aside>
-               
-            </aside>
-            <aside>
+                <h3>Current Conditions:</h3>
+                <p id="forecast">Loading weather data...</p>
+
+                <small id="location">Loading location data...</small> 
                 
+                <div style="flex:50%"><input type="text" id="locationInput" placeholder="Enter your location..."> </div>
+                <div style="flex:50%"><button onclick="getLocation()">Get Weather</button></div>
+            </aside>
+            <aside>
+                <h3>Sensor Readings:</h3>
+                <table>
+                    <tr>
+                        <td>External Temperature:</td>
+                        <td id="extTemp">Loading...</td>
+                    </tr>
+                    <tr>
+                        <td>Internal Temperature:</td>
+                        <td id="intTemp">Loading...</td>
+                    </tr>
+                    <tr>
+                        <td>Light:</td>
+                        <td id="light">Loading...</td>
+                    </tr>
+            </table>
+            </aside>
+            <aside>
+                <h3>Control Panel:</h3>
+                <button onclick="toggleShades()">Toggle Shades</button>
+                <button onclick="toggleCooling()">Toggle Fan</button>
+                <button onclick="toggleHeating()">Toggle Heater</button>
+                <input type="range" min="0" max="45" value="20" id="tempInput" oninput="setTemp()">
+                <p>Set Temperature: <span id="tempDisplay">20</span>°C</p>
+                <a href="temp.html">link (temp)</a>
             </aside>
         </section>
-        
+
     </body>
 </html>
