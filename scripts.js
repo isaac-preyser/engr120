@@ -90,7 +90,7 @@ function updateLocationByCoordinates(lat, long){
         // Work with JSON data here
         positionData = data; //store the data in the global variable
         console.log(data);
-        var location = data.features[2].place_name;
+        var location = data.features[1].place_name;
         console.log(location);
         document.getElementById("location").innerHTML = location;
     }).catch(err => {
