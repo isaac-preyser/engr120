@@ -10,6 +10,12 @@ green_led = machine.Pin(16, machine.Pin.OUT) #green LED
 yellow_led = machine.Pin(17, machine.Pin.OUT) #yellow LED
 red_led = machine.Pin(18, machine.Pin.OUT) #red LED
 
+#set all LEDs to ON
+green_led.value(1)
+yellow_led.value(1)
+red_led.value(1)
+
+
 # Create a network connection
 ssid = 'RPI_PICO_AP'       #Set access point name 
 password = '12345678'      #Set your access point password
@@ -42,9 +48,12 @@ def get_status():
     tempInternal = getValue(2, 'T')
     lightIntensity = getValue(3, 'V')
     tempExternal = getValue(1, 'T')
+    green_led_state = green_led.value()
+    yellow_led_state = yellow_led.value()
+    red_led_state = red_led.value()
     
     #do logic to perform actions based on the values of the sensors
-    
+
 
     
     #json object !!!
@@ -52,6 +61,10 @@ def get_status():
         "tempInternal": tempInternal, 
         "lightIntensity": lightIntensity,
         "tempExternal": tempExternal,
+        "greenLED": green_led_state,
+        "yellowLED": yellow_led_state,
+        "redLED": red_led_state
+        
     }
     return json.dumps(status)
 
@@ -70,7 +83,6 @@ while True:
     if request:
         request = str(request)
         print('Content = %s' % request)
-
    
     if request.find("/status") == 6:
         response = get_status()
