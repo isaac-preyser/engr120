@@ -119,12 +119,10 @@ function updateStatus() {
             xhr.onreadystatechange = function() {
                 if (xhr.readyState == 4 && xhr.status == 200) {
                     var data = JSON.parse(xhr.responseText);
-                    document.getElementById("irEmitterStatus").innerHTML = data.irEmitterStatus;
-                    var irEmitterColor = data.irEmitterStatus === "ON" ? "purple" : "black";
-                    document.getElementById("irEmitterIndicator").style.backgroundColor = irEmitterColor;
-                    document.getElementById("RedLEDStatus").innerHTML = data.RedLEDStatus;
-                    var buzzerColor = data.RedLEDStatus === "On" ? "red" : "gray";
-                    document.getElementById("buzzerIndicator").style.backgroundColor = buzzerColor;
+                    //update the DOM with the data
+                    document.getElementById("extTemp").innerHTML = data.tempExternal + " °C";
+                    document.getElementById("intTemp").innerHTML = data.tempInternal + " °C";
+                    document.getElementById("light").innerHTML = data.lightIntensity + " V";   
                 }
             };
             xhr.open("GET", "/status", true);
@@ -132,26 +130,17 @@ function updateStatus() {
         }
         setInterval(updateStatus, 1000); // Refresh every 1 second
 
-function toggleShades() {
-    //send request to the server to toggle the shades
 
-
-}
-
-function toggleHeating() {
-
-}
-
-function toggleCooling() {
-    //send request to the server to toggle the cooling
-
-} 
 
 function setTemp(){
     //update the temperature set on the DOM
     var temp = document.getElementById("tempInput").value;
     document.getElementById("tempDisplay").innerHTML = temp;
 }
+
+
+
+
         </script>
         <style>
             /* MVP.css v1.14 - https://github.com/andybrewer/mvp */
@@ -724,21 +713,21 @@ blockquote footer {
                 <table>
                     <tr>
                         <td>External Temperature:</td>
-                        <td id="extTemp">Loading...</td>
+                        <td id="extTemp" style="text-align: right;"> {EXTERNAL_TEMP} °C </td>
                     </tr>
                     <tr>
                         <td>Internal Temperature:</td>
-                        <td id="intTemp">Loading...</td>
+                        <td id="intTemp" style="text-align: right;"> {INTERNAL_TEMP:} °C </td>
                     </tr>
                     <tr>
                         <td>Light:</td>
-                        <td id="light">Loading...</td>
+                        <td id="light" style="text-align: right;"> {LIGHT_VALUE} V</td>
                     </tr>
             </table>
             </aside>
             <aside>
                 <h3>Control Panel:</h3>
-                <button onclick="toggleShades()" id="shadesButton">Toggle Shades</button>
+                <button onclick="toggleShades()" id="shadesButton"></button>
                 <button onclick="toggleCooling()" id="fanButton">Toggle Fan</button>
                 <button onclick="toggleHeating()" id="heaterButton">Toggle Heater</button>
                 <input type="range" min="0" max="45" value="20" id="tempInput" oninput="setTemp()">
