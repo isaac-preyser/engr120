@@ -139,23 +139,42 @@ function updateStatus() {
                     } else {
                         document.getElementById("led3").style.backgroundColor = "grey";
                     }
+                    if (autoMode == 1) {
+                        document.getElementById("autoButton").style.backgroundColor = "#118bee"; //set to normal color
+                    } else {
+                        document.getElementById("autoButton").style.backgroundColor = "#999"; //grey out the button
+                    
                 }
             };
             xhr.open("GET", "/status", true);
             xhr.send();
         }
-        setInterval(updateStatus, 1000); // Refresh every 1 second
-
+    }
+    setInterval(updateStatus, 1000); // Refresh every 1 second (this seems like a bad idea to call this recursively)
 
 
 function setTemp(){
     //update the temperature set on the DOM
     var temp = document.getElementById("tempInput").value;
     document.getElementById("tempDisplay").innerHTML = temp;
+    //send a request to the server to update the temperature
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "/updateTemp?temp="+temp, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send();
+
 }
-
-
-function 
+var autoMode = true; //global variable to store the state of the auto mode
+function toggleAuto(){
+    //send a request to the server to toggle the auto mode
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "/toggleAuto?autoMode="+!toggleAuto, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send();
+    //update the toggle
+    autoMode = !autoMode;
+}
+ 
 
 
         </script>
@@ -770,6 +789,7 @@ blockquote footer {
                 <button onclick="toggleShades()" id="shadesButton"></button>
                 <button onclick="toggleCooling()" id="fanButton">Toggle Fan</button>
                 <button onclick="toggleHeating()" id="heaterButton">Toggle Heater</button>
+                <button onclick="toggleAuto()" id="autoButton">Auto Mode</button>
                 <input type="range" min="0" max="45" value="20" id="tempInput" oninput="setTemp()">
                 <p>Set Temperature: <span id="tempDisplay">20</span>°C</p>
                 <a href="temp.html">link (temp)</a>

@@ -15,6 +15,19 @@ green_led.value(1)
 yellow_led.value(1)
 red_led.value(1)
 
+#global variables
+target_temp = 25 #in C
+TARGET_VOLTAGE = 3.1 #in V
+doAuto = True #operate the device in automatic mode
+
+# other global variables
+tempInternal = getValue(2, 'T')
+lightIntensity = getValue(3, 'V')
+tempExternal = getValue(1, 'T')
+green_led_state = green_led.value()
+yellow_led_state = yellow_led.value()
+red_led_state = red_led.value()
+
 
 # Create a network connection
 ssid = 'RPI_PICO_AP'       #Set access point name 
@@ -42,9 +55,26 @@ def web_page():
     return html
 
 
+def do_logic():
+    if tempInternal < target_temp:
+        green_led.value(1)
+        red_led.value(0)
+    else:  
+        green_led.value(0)
+        red_led.value(1)
+
+    if lightIntensity > TARGET_VOLTAGE:
+        #it's dark, turn on the lights
+        yellow_led.value(1)
+    else:
+        #it's bright, turn off the lights
+        yellow_led.value(0)
+
+
 # Function to get the status of the IR emitter and redLED
 # creates a JSON object and returns it as a string
 def get_status():
+    #update the global variables
     tempInternal = getValue(2, 'T')
     lightIntensity = getValue(3, 'V')
     tempExternal = getValue(1, 'T')
@@ -52,10 +82,11 @@ def get_status():
     yellow_led_state = yellow_led.value()
     red_led_state = red_led.value()
     
-    #do logic to perform actions based on the values of the sensors
-
-
+    if doAuto:
+        do_logic()
     
+    
+
     #json object !!!
     status = {
         "tempInternal": tempInternal, 
@@ -63,7 +94,8 @@ def get_status():
         "tempExternal": tempExternal,
         "greenLED": green_led_state,
         "yellowLED": yellow_led_state,
-        "redLED": red_led_state
+        "redLED": red_led_state,
+        "autoMode": doAuto
         
     }
     return json.dumps(status)
@@ -83,8 +115,51 @@ while True:
     if request:
         request = str(request)
         print('Content = %s' % request)
-   
+        
+    if str(request).find("/updateTemp") == 6:
+        #parse the request: 
+        #request = /updateTemp?temp=(some number)
+        print('handling updateTemp request')
+        #find the index of the '='
+        index = str(request).find("=")
+        #get the substring after the '='
+        temp = str(request)[index+1:]
+        #truncate the string after the first space
+        temp = temp[:temp.find(' ')]
+        print('temp:', temp)
+        #convert the substring to an integer
+        temp = int(temp)
+        #set the global variable to the new temperature
+        target_temp = temp
+        response = web_page()
+        conn.send("HTTP/1.1 200 OK\n")
+        conn.send("Content-Type: text/html\n")
+        conn.send("Connection: close\n\n")
+        conn.sendall(response)
+
+    if str(request).find("/updateAuto") == 6:
+        #parse the request: 
+        #request = /updateAuto?auto=(some number)
+        print('handling updateAuto request')
+        #find the index of the '='
+        index = str(request).find("=")
+        #get the substring after the '='
+        auto = str(request)[index+1:]
+        #truncate the string after the first space
+        auto = auto[:auto.find(' ')]
+        print('auto:', auto)
+        #convert the substring to an boolean
+        auto = int(auto == 'true')
+        #set the global variable to the new temperature
+        doAuto = auto
+        response = web_page()
+        conn.send("HTTP/1.1 200 OK\n")
+        conn.send("Content-Type: text/html\n")
+        conn.send("Connection: close\n\n")
+        conn.sendall(response)
+
     if request.find("/status") == 6:
+        print('handling status request')
         response = get_status()
         conn.send("HTTP/1.1 200 OK\n")
         conn.send("Content-Type: application/json\n")
