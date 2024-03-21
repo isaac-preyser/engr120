@@ -16,7 +16,7 @@ yellow_led.value(1)
 red_led.value(1)
 
 #global variables
-target_temp = 25 #in C
+target_temp = 30 #in C
 TARGET_VOLTAGE = 3.1 #in V
 doAuto = True #operate the device in automatic mode
 
@@ -48,45 +48,43 @@ print(ap.ifconfig())
 
 # Define HTTP response
 def web_page():
-    #replace EXTERNAL_TEMP with the value of the external temperature (temp of therm1)
-    #replace INTERNAL_TEMP with the value of the internal temperature (temp of therm2)
-    #replace SHADES_RAISED with the value of the shades (0 or 1)
     html = open('index.html').read().replace('{EXTERNAL_TEMP}', str(getValue(1, 'T'))).replace('{INTERNAL_TEMP:}', str(getValue(2, 'T'))).replace('{LIGHT_VALUE}', str(getValue(3, 'V')))
     return html
 
 
-def do_logic():
-    if tempInternal < target_temp:
-        green_led.value(1)
+
+def update():
+    global tempInternal, lightIntensity, tempExternal, green_led_state, yellow_led_state, red_led_state, doAuto
+    while True: 
+        #update the global variables
+        tempInternal = getValue(2, 'T')
+        lightIntensity = getValue(3, 'V')
+        tempExternal = getValue(1, 'T')
+        green_led_state = green_led.value()
+        yellow_led_state = yellow_led.value()
+        red_led_state = red_led.value()
+
+        print('auto:', doAuto)
+        #if the device is in automatic mode, do the logic. 
+        if doAuto:
+            doLogic()
+        #wait for 5 seconds
+        time.sleep(0.3)
+
+
+def doLogic():
+    global tempInternal, lightIntensity, tempExternal, green_led_state, yellow_led_state, red_led_state, doAuto, red_led, green_led, yellow_led
+    if tempInternal > target_temp:
+        #turn off the red LED
         red_led.value(0)
-    else:  
-        green_led.value(0)
-        red_led.value(1)
-
-    if lightIntensity > TARGET_VOLTAGE:
-        #it's dark, turn on the lights
-        yellow_led.value(1)
+        green_led.value(1)
     else:
-        #it's bright, turn off the lights
-        yellow_led.value(0)
-
-
+        #turn on the red LED
+        red_led.value(1)
+        green_led.value(0)
 # Function to get the status of the IR emitter and redLED
 # creates a JSON object and returns it as a string
 def get_status():
-    #update the global variables
-    tempInternal = getValue(2, 'T')
-    lightIntensity = getValue(3, 'V')
-    tempExternal = getValue(1, 'T')
-    green_led_state = green_led.value()
-    yellow_led_state = yellow_led.value()
-    red_led_state = red_led.value()
-    
-    if doAuto:
-        do_logic()
-    
-    
-
     #json object !!!
     status = {
         "tempInternal": tempInternal, 
@@ -101,7 +99,7 @@ def get_status():
     return json.dumps(status)
 
 # Start the ADC monitoring function in a separate thread
-_thread.start_new_thread(get_status, ())
+_thread.start_new_thread(update, ())
 
 # Create a socket server
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

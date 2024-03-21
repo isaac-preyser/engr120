@@ -47,6 +47,7 @@ function init() {
     } else {
         console.log("Geolocation is not supported by this browser.");
     }
+    setInterval(updateStatus, 1000); //update the status every second
 }
 
 function getLocation(){
@@ -125,7 +126,7 @@ function updateStatus() {
                     document.getElementById("light").innerHTML = data.lightIntensity + " V";   
                     //update the virtual LEDs
                     if (data.greenLED == 1) {
-                        document.getElementById("led1").style.backgroundColor = "darkolivegreen";
+                        document.getElementById("led1").style.backgroundColor = "lightgreen";
                     } else {
                         document.getElementById("led1").style.backgroundColor = "grey";
                     }
@@ -135,7 +136,7 @@ function updateStatus() {
                         document.getElementById("led2").style.backgroundColor = "grey";
                     }
                     if (data.yellowLED == 1) {
-                        document.getElementById("led3").style.backgroundColor = "darkkhaki";
+                        document.getElementById("led3").style.backgroundColor = "gold";
                     } else {
                         document.getElementById("led3").style.backgroundColor = "grey";
                     }
@@ -150,8 +151,7 @@ function updateStatus() {
             xhr.send();
         }
     }
-    setInterval(updateStatus, 1000); // Refresh every 1 second (this seems like a bad idea to call this recursively)
-
+    
 
 function setTemp(){
     //update the temperature set on the DOM
@@ -241,6 +241,23 @@ html {
     width: 1rem;
     /* centre the LEDs */
     position: relative;
+    
+}
+#led1 {
+    --webkit-box-shadow:0px 0px 50px 5px rgba(45,255,98,0.8);
+    -moz-box-shadow: 0px 0px 50px 5px rgba(45,255,98,0.8);
+    box-shadow: 0px 0px 50px 5px rgba(45,255,98,0.8); 
+}
+#led2{
+    -webkit-box-shadow:0px 0px 50px 5px rgba(230, 255, 45, 0.8);
+    -moz-box-shadow: 0px 0px 50px 5px rgba(230, 255, 45, 0.8);
+    box-shadow: 0px 0px 50px 5px rgba(230, 255, 45, 0.8);
+}
+#led3{
+    -webkit-box-shadow:0px 0px 50px 5px rgba(255, 45, 45, 0.8);
+    -moz-box-shadow: 0px 0px 50px 5px rgba(255, 45, 45, 0.8);
+    box-shadow: 0px 0px 50px 5px rgba(255, 45, 45, 0.8);
+
 }
 
 /* Layout */
