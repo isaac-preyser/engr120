@@ -35,9 +35,6 @@ password = '12345678'      #Set your access point password
 ap = network.WLAN(network.AP_IF)
 ap.config(essid=ssid, password=password)
 ap.active(True)            #activating
-#output the MAC address of the AP
-mac = ap.config('mac').hex
-print('MAC address:', mac)
 
 
 
@@ -48,7 +45,7 @@ print(ap.ifconfig())
 
 # Define HTTP response
 def web_page():
-    html = open('index.html').read().replace('{EXTERNAL_TEMP}', str(getValue(1, 'T'))).replace('{INTERNAL_TEMP:}', str(getValue(2, 'T'))).replace('{LIGHT_VALUE}', str(getValue(3, 'V')))
+    html = open('index.html', "r").read().replace('{EXTERNAL_TEMP}', str(getValue(1, 'T'))).replace('{INTERNAL_TEMP:}', str(getValue(2, 'T'))).replace('{LIGHT_VALUE}', str(getValue(3, 'V')))
     return html
 
 

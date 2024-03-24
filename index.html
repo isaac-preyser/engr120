@@ -6,10 +6,20 @@
 <html>
     <head>
         <script>    
-        //import everything over from scripts.js
-        var weatherData = null; //global variable to store the weather data
+                //import everything over from scripts.js
+                var weatherData = null; //global variable to store the weather data
 var positionData = null; //global variable to store the position data
 var publicToken = "pk.eyJ1IjoicHJleXNlciIsImEiOiJjbHRvenp2b3YwNTVqMmpwa3ZldmdzdzI5In0.xxdA2sVzYqcyU1kJPGek0Q" //for mapbox API
+var autoMode = true; //global variable to store the auto mode state
+setInterval(updateStatus, 1000); // Refresh every 1 second
+
+function debounce(func, timeout = 300){
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => { func.apply(this, args); }, timeout);
+  };
+}
 
 function getWeather(lat, long, callback) {
     var apiUrl = "https://api.pirateweather.net/forecast/8xb4Xw81stuOYY6R9OaUdLcwsbsRQzBa/"+lat+"%2C"+long+"?units=ca";
@@ -19,7 +29,9 @@ function getWeather(lat, long, callback) {
         }).then(data => {
             // Work with JSON data here
             weatherData = data; //store the data in the global variable
-            document.getElementById("forecast").innerHTML = "It is currently "+ Math.round(weatherData.currently.temperature) + " degrees and " + weatherData.currently.summary +".";
+            document.getElementById("forecast").innerHTML = "It is currently "+
+                 Math.round(weatherData.currently.temperature) + " degrees and " +
+                     weatherData.currently.summary +".";
             console.log(data);
             callback(); //call the callback function
         }).catch(err => {
@@ -47,7 +59,7 @@ function init() {
     } else {
         console.log("Geolocation is not supported by this browser.");
     }
-    setInterval(updateStatus, 1000); //update the status every second
+    setInterval(updateStatus, 1000); // Refresh every 1 second
 }
 
 function getLocation(){
@@ -126,34 +138,32 @@ function updateStatus() {
                     document.getElementById("light").innerHTML = data.lightIntensity + " V";   
                     //update the virtual LEDs
                     if (data.greenLED == 1) {
-                        document.getElementById("led1").style.backgroundColor = "lightgreen";
+                        document.getElementById("led1").style.backgroundColor = "darkolivegreen";
                     } else {
                         document.getElementById("led1").style.backgroundColor = "grey";
                     }
                     if (data.redLED == 1) {
-                        document.getElementById("led2").style.backgroundColor = "firebrick";
-                    } else {
-                        document.getElementById("led2").style.backgroundColor = "grey";
-                    }
-                    if (data.yellowLED == 1) {
-                        document.getElementById("led3").style.backgroundColor = "gold";
+                        document.getElementById("led3").style.backgroundColor = "firebrick";
                     } else {
                         document.getElementById("led3").style.backgroundColor = "grey";
                     }
-                    if (autoMode == 1) {
-                        document.getElementById("autoButton").style.backgroundColor = "#118bee"; //set to normal color
+                    if (data.yellowLED == 1) {
+                        document.getElementById("led2").style.backgroundColor = "darkkhaki";
                     } else {
-                        document.getElementById("autoButton").style.backgroundColor = "#999"; //grey out the button
-                    
+                        document.getElementById("led2").style.backgroundColor = "grey";
+                    }
                 }
             };
             xhr.open("GET", "/status", true);
             xhr.send();
         }
-    }
-    
 
-function setTemp(){
+
+
+
+const setTemp = debounce(setTempHelper, 300);        
+
+function setTempHelper() {
     //update the temperature set on the DOM
     var temp = document.getElementById("tempInput").value;
     document.getElementById("tempDisplay").innerHTML = temp;
@@ -164,17 +174,31 @@ function setTemp(){
     xhr.send();
 
 }
-var autoMode = true; //global variable to store the state of the auto mode
+
+
 function toggleAuto(){
     //send a request to the server to toggle the auto mode
     var xhr = new XMLHttpRequest();
-    xhr.open("GET", "/toggleAuto?autoMode="+!toggleAuto, true);
+    if (autoMode){
+        document.getElementById("autoButton").innerHTML = "Manual Mode";
+        //set button to grey
+        document.getElementById("autoButton").style.backgroundColor = "grey";
+        document.getElementById("autoButton").style.color = "grey";
+        xhr.open("GET", "/updateAuto?auto=false", true);
+        autoMode = false;
+    } else {
+        document.getElementById("autoButton").innerHTML = "Auto Mode";
+        //set button to link color
+        document.getElementById("autoButton").style.backgroundColor = "var(--color-link)";
+        document.getElementById("autoButton").style.color = "var(--color-link)";
+        xhr.open("GET", "/updateAuto?auto=true", true);
+        autoMode = true;
+    }
     xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.send();
-    //update the toggle
-    autoMode = !autoMode;
+    xhr.send();    
 }
- 
+
+
 
 
         </script>
@@ -803,7 +827,7 @@ blockquote footer {
             </aside>
             <aside>
                 <h3>Control Panel:</h3>
-                <button onclick="toggleShades()" id="shadesButton"></button>
+                <button onclick="toggleShades()" id="shadesButton">Toggle Shades</button>
                 <button onclick="toggleCooling()" id="fanButton">Toggle Fan</button>
                 <button onclick="toggleHeating()" id="heaterButton">Toggle Heater</button>
                 <button onclick="toggleAuto()" id="autoButton">Auto Mode</button>
