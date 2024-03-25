@@ -69,14 +69,14 @@ def update():
         
         doLogic(doAuto)
         #wait for 5 seconds
-        time.sleep(0.3)
+        time.sleep(1.5)
 
 
 def doLogic(toggle):
     global tempInternal, lightIntensity, tempExternal, green_led_state, yellow_led_state, red_led_state, doAuto, red_led, green_led, yellow_led
     #if auto mode is on, perform normal automatic logic. 
     if toggle:       
-        if tempInternal > target_temp:
+        if tempInternal < target_temp:
             red_led.value(1) # heat on
             green_led.value(0) # fan off
         else: 
