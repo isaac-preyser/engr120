@@ -55,7 +55,7 @@ def web_page():
 
 
 def update():
-    global tempInternal, lightIntensity, tempExternal, green_led_state, yellow_led_state, red_led_state, doAuto
+    global tempInternal, lightIntensity, tempExternal, green_led_state, yellow_led_state, red_led_state, doAuto, shadesOverride, fanOverride, heaterOverride
     while True: 
         #update the global variables
         tempInternal = getValue(2, 'T')
