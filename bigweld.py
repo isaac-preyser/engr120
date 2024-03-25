@@ -157,9 +157,9 @@ while True:
         conn.send("Connection: close\n\n")
         conn.sendall(response)
 
-    if str(request).find("/updateAuto") == 6:
+    if str(request).find("/autoMode") == 6:
         #parse the request: 
-        #request = /updateAuto?auto=(some number)
+        #request = /updateAuto?auto=(true/false)
         print('handling updateAuto request')
         #find the index of the '='
         index = str(request).find("=")
@@ -170,7 +170,7 @@ while True:
         print('auto:', auto)
         #convert the substring to an boolean
         auto = int(auto == 'true')
-        #set the global variable to the new temperature
+        #update the global variable
         doAuto = auto
         response = web_page()
         conn.send("HTTP/1.1 200 OK\n")
@@ -180,34 +180,40 @@ while True:
 
     #handle the override requests
     if str(request).find("/override") == 6:
-        #parse the request: 
-        #request = /override?device=(some device)&state=(some state)
+        #parse the request:
+        #request = /override?device=(shades/fan/heater)&state=(on/off)
         print('handling override request')
-        #find the index of the '='
+        #find the index of the '=', and the '&'
         index = str(request).find("=")
+        amp = str(request).find("&")
         #get the substring after the '='
-        device = str(request)[index+1:]
-        #truncate the string after the first space
-        device = device[:device.find(' ')]
+        device = str(request)[index+1:amp]
+        #truncate the string after the first '&'
+        state = str(request)[amp+1:]
+
         #find the index of the '='
-        index = str(request).find("=", index+1)
+        index = str(state).find("=")
         #get the substring after the '='
-        state = str(request)[index+1:]
+        state = str(state)[index+1:]
+
         #truncate the string after the first space
         state = state[:state.find(' ')]
         print('device:', device)
         print('state:', state)
-        #convert the substring to an boolean
-        overrideState = (state == 'on') #this is such a hack, but it works lmao
+        
         if device == 'shades':
-            shadesOverride = state
-        if device == 'fan':
-            fanOverride = state
-        if device == 'heater':
-            heaterOverride = state
-        #turn off auto mode, if any override is on
-        if shadesOverride or fanOverride or heaterOverride:
+            #toggle the shades override
+            shadesOverride = state == 'on'
             doAuto = False
+        if device == 'fan':
+            #toggle the fan override
+            fanOverride = state == 'on'
+            doAuto = False
+        if device == 'heater':
+            #toggle the heater override
+            heaterOverride = state == 'on'
+            doAuto = False
+        
         response = web_page()
         conn.send("HTTP/1.1 200 OK\n")
         conn.send("Content-Type: text/html\n")
@@ -229,4 +235,5 @@ while True:
         conn.send("Connection: close\n\n")
         conn.sendall(response)
     conn.close()
+    time.sleep_ms(500)
 

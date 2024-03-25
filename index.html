@@ -231,13 +231,13 @@ function toggleAuto(){
     if (autoMode) {
         //turn off auto mode
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", "/autoMode?state=0", true);
+        xhr.open("GET", "/autoMode?state=false", true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send();
     } else {
         //turn on auto mode
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", "/autoMode?state=1", true);
+        xhr.open("GET", "/autoMode?state=true", true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send();
     }
@@ -246,13 +246,13 @@ function toggleShades(){
     if(shadesOverride){
         //turn off shades
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", "/shades?state=off", true);
+        xhr.open("GET", "/override?device=shades&state=0", true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send();
     } else {
         //turn on shades
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", "/shades?state=on", true);
+        xhr.open("GET", "/override?device=shades&state=1", true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send();
     }
@@ -262,13 +262,13 @@ function toggleFan(){
     if(fanOverride){
         //turn off fan
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", "/fan?state=off", true);
+        xhr.open("GET", "/override?device=fan&state=0", true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send();
     } else {
         //turn on fan
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", "/fan?state=on", true);
+        xhr.open("GET", "/override?device=fan&state=1", true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send();
     }
@@ -278,13 +278,13 @@ function toggleHeater(){
     if(heaterOverride){
         //turn off heater
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", "/heater?state=off", true);
+        xhr.open("GET", "/override?device=heater&state=0", true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send();
     } else {
         //turn on heater
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", "/heater?state=on", true);
+        xhr.open("GET", "/override?device=heater&state=1", true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send();
     }
