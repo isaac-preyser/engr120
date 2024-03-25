@@ -6,9 +6,9 @@ import _thread
 import json 
 from poll import getValue
 
-green_led = machine.Pin(16, machine.Pin.OUT) #green LED
-yellow_led = machine.Pin(17, machine.Pin.OUT) #yellow LED
-red_led = machine.Pin(18, machine.Pin.OUT) #red LED
+green_led = machine.Pin(16, machine.Pin.OUT) #green LED; represents fan
+yellow_led = machine.Pin(17, machine.Pin.OUT) #yellow LED; represents shades
+red_led = machine.Pin(18, machine.Pin.OUT) #red LED; represents heater
 
 #set all LEDs to ON
 green_led.value(1)
@@ -27,6 +27,10 @@ tempExternal = getValue(1, 'T')
 green_led_state = green_led.value()
 yellow_led_state = yellow_led.value()
 red_led_state = red_led.value()
+shadesOverride = False
+fanOverride = False
+heaterOverride = False
+
 
 
 # Create a network connection
@@ -62,23 +66,40 @@ def update():
         red_led_state = red_led.value()
 
         print('auto:', doAuto)
-        #if the device is in automatic mode, do the logic. 
-        if doAuto:
-            doLogic()
+        
+        doLogic(doAuto)
         #wait for 5 seconds
         time.sleep(0.3)
 
 
-def doLogic():
+def doLogic(toggle):
     global tempInternal, lightIntensity, tempExternal, green_led_state, yellow_led_state, red_led_state, doAuto, red_led, green_led, yellow_led
-    if tempInternal > target_temp:
-        #turn off the red LED
-        red_led.value(0)
-        green_led.value(1)
+    #if auto mode is on, perform normal automatic logic. 
+    if toggle:       
+        if tempInternal > target_temp:
+            red_led.value(1) # heat on
+            green_led.value(0) # fan off
+        else: 
+            red_led.value(0) #heat off
+            green_led.value(1) #fan on
+        if lightIntensity > TARGET_VOLTAGE:
+            yellow_led.value(0) #shades off, it is dark. 
+        else:
+            yellow_led.value(1) #shades on, it is bright.
+    #if auto mode is off, perform manual logic.
     else:
-        #turn on the red LED
-        red_led.value(1)
-        green_led.value(0)
+        if heaterOverride:
+            red_led.value(0) # heat off
+        else:
+            red_led.value(1) # heat on
+        if fanOverride:
+            green_led.value(0) # fan off
+        else:
+            green_led.value(1) # fan on
+        if shadesOverride:
+            yellow_led.value(0) #shades off
+        else:
+            yellow_led.value(1) #shades on
 # Function to get the status of the IR emitter and redLED
 # creates a JSON object and returns it as a string
 def get_status():
@@ -90,7 +111,11 @@ def get_status():
         "greenLED": green_led_state,
         "yellowLED": yellow_led_state,
         "redLED": red_led_state,
-        "autoMode": doAuto
+        "autoMode": doAuto,
+        "shadesOverride": shadesOverride,
+        "fanOverride": fanOverride,
+        "heaterOverride": heaterOverride, 
+
         
     }
     return json.dumps(status)
@@ -152,6 +177,43 @@ while True:
         conn.send("Content-Type: text/html\n")
         conn.send("Connection: close\n\n")
         conn.sendall(response)
+
+    #handle the override requests
+    if str(request).find("/override") == 6:
+        #parse the request: 
+        #request = /override?device=(some device)&state=(some state)
+        print('handling override request')
+        #find the index of the '='
+        index = str(request).find("=")
+        #get the substring after the '='
+        device = str(request)[index+1:]
+        #truncate the string after the first space
+        device = device[:device.find(' ')]
+        #find the index of the '='
+        index = str(request).find("=", index+1)
+        #get the substring after the '='
+        state = str(request)[index+1:]
+        #truncate the string after the first space
+        state = state[:state.find(' ')]
+        print('device:', device)
+        print('state:', state)
+        #convert the substring to an boolean
+        overrideState = (state == 'on') #this is such a hack, but it works lmao
+        if device == 'shades':
+            shadesOverride = state
+        if device == 'fan':
+            fanOverride = state
+        if device == 'heater':
+            heaterOverride = state
+        #turn off auto mode, if any override is on
+        if shadesOverride or fanOverride or heaterOverride:
+            doAuto = False
+        response = web_page()
+        conn.send("HTTP/1.1 200 OK\n")
+        conn.send("Content-Type: text/html\n")
+        conn.send("Connection: close\n\n")
+        conn.sendall(response)
+
 
     if request.find("/status") == 6:
         print('handling status request')

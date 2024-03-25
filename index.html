@@ -10,7 +10,12 @@
                 var weatherData = null; //global variable to store the weather data
 var positionData = null; //global variable to store the position data
 var publicToken = "pk.eyJ1IjoicHJleXNlciIsImEiOiJjbHRvenp2b3YwNTVqMmpwa3ZldmdzdzI5In0.xxdA2sVzYqcyU1kJPGek0Q" //for mapbox API
+//not sure if this is good code practice 
 var autoMode = true; //global variable to store the auto mode state
+var shadesOverride = false; //global variable to store the shades override state
+var fanOverride = false; //global variable to store the fan override state
+var heaterOverride = false; //global variable to store the heater override state
+
 setInterval(updateStatus, 1000); // Refresh every 1 second
 
 function debounce(func, timeout = 300){
@@ -138,19 +143,65 @@ function updateStatus() {
                     document.getElementById("light").innerHTML = data.lightIntensity + " V";   
                     //update the virtual LEDs
                     if (data.greenLED == 1) {
+                        //this means the fan is on
                         document.getElementById("led1").style.backgroundColor = "darkolivegreen";
+                        //enable the glow effect
+                        document.getElementById("led1").style.boxShadow = "0 0 10px 5px darkolivegreen";
+                        //update the button text
+                        document.getElementById("fanButton").innerHTML = "Fan (ON)";
                     } else {
                         document.getElementById("led1").style.backgroundColor = "grey";
+                        //remove the glow effect
+                        document.getElementById("led1").style.boxShadow = "none";
+                        //update the button text
+                        document.getElementById("fanButton").innerHTML = "Fan (OFF)";
                     }
                     if (data.redLED == 1) {
                         document.getElementById("led3").style.backgroundColor = "firebrick";
+                        //enable the glow effect
+                        document.getElementById("led3").style.boxShadow = "0 0 10px 5px firebrick";
+                        //update the button text
+                        document.getElementById("heaterButton").innerHTML = "Heater (ON)";
                     } else {
                         document.getElementById("led3").style.backgroundColor = "grey";
+                        //remove the glow effect
+                        document.getElementById("led3").style.boxShadow = "none";
+                        //update the button text
+                        document.getElementById("heaterButton").innerHTML = "Heater (OFF)";
                     }
                     if (data.yellowLED == 1) {
                         document.getElementById("led2").style.backgroundColor = "darkkhaki";
+                        //enable the glow effect
+                        document.getElementById("led2").style.boxShadow = "0 0 10px 5px darkkhaki";
+                        //update the button text
+                        document.getElementById("shadesButton").innerHTML = "Shades (ON)";
                     } else {
                         document.getElementById("led2").style.backgroundColor = "grey";
+                        //remove the glow effect
+                        document.getElementById("led2").style.boxShadow = "none";
+                        //update the button text
+                        document.getElementById("shadesButton").innerHTML = "Shades (OFF)";
+                    }
+                    //update auto mode button
+                    if (data.autoMode == 1) {
+                        document.getElementById("autoButton").innerHTML = "Auto Mode  (ON)";
+                        document.getElementById("autoButton").style.backgroundColor = "var(--color-link)";
+                        document.getElementById("autoButton").style.borderColor = "var(--color-link)";
+                        autoMode = true;
+                        //lock out all input, except for the temperature slider and forecast card
+                        document.getElementById("shadesButton").disabled = true;
+                        document.getElementById("fanButton").disabled = true;
+                        document.getElementById("heaterButton").disabled = true;
+
+                    } else {
+                        document.getElementById("autoButton").innerHTML = "Auto Mode (OFF)";    
+                        document.getElementById("autoButton").style.backgroundColor = "grey";
+                        document.getElementById("autoButton").style.borderColor = "grey";
+                        //unlock all input
+                        document.getElementById("shadesButton").disabled = false;
+                        document.getElementById("fanButton").disabled = false;
+                        document.getElementById("heaterButton").disabled = false;
+                        autoMode = false;
                     }
                 }
             };
@@ -177,26 +228,70 @@ function setTempHelper() {
 
 
 function toggleAuto(){
-    //send a request to the server to toggle the auto mode
-    var xhr = new XMLHttpRequest();
-    if (autoMode){
-        document.getElementById("autoButton").innerHTML = "Manual Mode";
-        //set button to grey
-        document.getElementById("autoButton").style.backgroundColor = "grey";
-        document.getElementById("autoButton").style.color = "grey";
-        xhr.open("GET", "/updateAuto?auto=false", true);
-        autoMode = false;
+    if (autoMode) {
+        //turn off auto mode
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/autoMode?state=0", true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send();
     } else {
-        document.getElementById("autoButton").innerHTML = "Auto Mode";
-        //set button to link color
-        document.getElementById("autoButton").style.backgroundColor = "var(--color-link)";
-        document.getElementById("autoButton").style.color = "var(--color-link)";
-        xhr.open("GET", "/updateAuto?auto=true", true);
-        autoMode = true;
+        //turn on auto mode
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/autoMode?state=1", true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send();
     }
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.send();    
 }
+function toggleShades(){
+    if(shadesOverride){
+        //turn off shades
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/shades?state=off", true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send();
+    } else {
+        //turn on shades
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/shades?state=on", true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send();
+    }
+}
+
+function toggleFan(){
+    if(fanOverride){
+        //turn off fan
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/fan?state=off", true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send();
+    } else {
+        //turn on fan
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/fan?state=on", true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send();
+    }
+}
+
+function toggleHeater(){
+    if(heaterOverride){
+        //turn off heater
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/heater?state=off", true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send();
+    } else {
+        //turn on heater
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/heater?state=on", true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send();
+    }
+}
+
+
+
 
 
 
@@ -828,8 +923,8 @@ blockquote footer {
             <aside>
                 <h3>Control Panel:</h3>
                 <button onclick="toggleShades()" id="shadesButton">Toggle Shades</button>
-                <button onclick="toggleCooling()" id="fanButton">Toggle Fan</button>
-                <button onclick="toggleHeating()" id="heaterButton">Toggle Heater</button>
+                <button onclick="toggleFan()" id="fanButton">Toggle Fan</button>
+                <button onclick="toggleHeater()" id="heaterButton">Toggle Heater</button>
                 <button onclick="toggleAuto()" id="autoButton">Auto Mode</button>
                 <input type="range" min="0" max="45" value="20" id="tempInput" oninput="setTemp()">
                 <p>Set Temperature: <span id="tempDisplay">20</span>°C</p>
